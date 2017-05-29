@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/hello-world-kotlin.iml" filepath="$PROJECT_DIR$/.idea/modules/hello-world-kotlin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/hello-world-kotlin_main.iml" filepath="$PROJECT_DIR$/.idea/modules/hello-world-kotlin_main.iml" group="hello-world-kotlin" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/hello-world-kotlin_test.iml" filepath="$PROJECT_DIR$/.idea/modules/hello-world-kotlin_test.iml" group="hello-world-kotlin" />
+    </modules>
+  </component>
+</project>
