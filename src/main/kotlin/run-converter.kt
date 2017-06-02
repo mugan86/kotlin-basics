@@ -33,6 +33,63 @@ interface RunConverterIF {
     }
 
     /**
+     * @param distance double value to asign total kms to convert. For Example: If value > 5 considerer input meters
+     * @return String with vO2max, result example '3850 (metres)-> VO2 max = 74 To calculate: (meters - 504) / 45
+     */
+    fun vO2MaxInCooperTest(distance) {
+
+        if (distance < 1000) /*Distance in kmeters*/ distance = this.GetDistanceinMeters(distance);
+
+        return this.getDoubleValue(String((distance - 504) / 45), 3);
+    }
+
+    /**
+     * @param v02   double value to asign vO2max that use to calculate distance to complete to obtain this vO2 max.
+     *              For Example: 74 (VO2max) = 3850 m in 12 minutes.
+     * @param in_km To return value in kilometers instead of meters (default)
+     * @return String with distance in meters or km (boolean specific)
+     */
+    fun distanceNeedToObtainSpecificVO2MaxWithCooperTest(v02:number, in_km: boolean): String{
+        if (!in_km) return String((v02*45) + 504);
+        return (this.GetDoubleValue((this.getDistanceInKms((v02*45) + 504)).toString(), 3));
+    }
+
+    /**
+     * @param percent : Percent to calculate FC range min value to FC zone (for example 50 = Z1)
+     *                Z1: 50-60
+     *                Z2: 60-70
+     *                Z3: 70-80
+     *                Z4: 80-90
+     *                Z5: 90-100
+     * @param low_fc  min ppm
+     * @param max_fc  max ppm
+     * @return Obtain select percent zone ppm range
+     */
+    ObtainFCZoneWithPercent(percent:number, low_fc, max_fc) {
+
+        let zone: string = "Zone " + ((percent - 50) / 10 + 1) + ": ";
+        low_fc = parseInt(low_fc);
+        max_fc = parseInt(max_fc);
+        return zone + (((max_fc-low_fc) * (percent)/100) + low_fc) + " - " + (((max_fc-low_fc) * (percent+10) / 100) + low_fc);
+    }
+
+    /**
+     * @param low_fc min ppm
+     * @param max_fc max ppm
+     * @return FC zones with PPM range
+     */
+    ObtainResumeOfFCZones(low_fc, max_fc) {
+        low_fc = parseInt(low_fc);
+        max_fc = parseInt(max_fc);
+        let fc_data = new Array<String>();
+        for (let i = 50; i <= 90; i = i+10)
+        {
+            fc_data.push(this.ObtainFCZoneWithPercent(i, low_fc, max_fc));
+        }
+        return fc_data;
+    }
+
+    /**
      * @param value to remove decimals (if exist)
      * @return Int value
      */
