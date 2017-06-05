@@ -1,3 +1,5 @@
+import com.sun.xml.internal.fastinfoset.util.StringArray
+import java.lang.Double.parseDouble
 import java.lang.Float.parseFloat
 import java.lang.Integer.parseInt
 
@@ -67,7 +69,7 @@ interface RunConverterIF {
      * @param max_fc  max ppm
      * @return Obtain select percent zone ppm range
      */
-    fun obtainFCZoneWithPercent(percent:Double, low_fc: String, max_fc: String): String {
+    fun obtainFCZoneWithPercent(percent:Int, low_fc: String, max_fc: String): String {
 
         val zone = "Zone " + ((percent - 50) / 10 + 1) + ": ";
         var low_fc = parseInt(low_fc);
@@ -80,13 +82,16 @@ interface RunConverterIF {
      * @param max_fc max ppm
      * @return FC zones with PPM range
      */
-    fun obtainResumeOfFCZones(low_fc: String, max_fc: String) {
+    fun obtainResumeOfFCZones(low_fc: String, max_fc: String): Array<String?> {
         val low_fc = parseInt(low_fc);
         val max_fc = parseInt(max_fc);
-        var fc_data = new Array<String>();
-        for (let i = 50; i <= 90; i = i+10)
+        var fc_data = arrayOfNulls<String>(4)
+        var pos = 0;
+        for (i in 50..90 step 10)
+        //for (i = 50; i <= 90; i = i+10)
         {
-            fc_data.push(this.ObtainFCZoneWithPercent(i, low_fc, max_fc));
+            fc_data[pos] = this.obtainFCZoneWithPercent(i, low_fc.toString(), max_fc.toString())
+            pos++
         }
         return fc_data;
     }
@@ -224,7 +229,7 @@ interface RunConverterIF {
      * @param distType: Distance unit (m, mile, km,...)
      * @return Climb m+ per km
      */
-    GetClimbMetersPerKm(distance, Climb, distType)
+    fun getClimbMetersPerKm(distance:Float, Climb: Int, distType: Int): Float
     {
         if (distType != 2) //Not metres
         {
@@ -293,7 +298,7 @@ interface RunConverterIF {
      */
     private fun getWithTwoDigits(value: String): String {
         //Remove all decimals before than asign correct format
-        var value = this.RemoveDecimalValue(parseFloat(value));
+        var value = this.RemoveDecimalValue(parseDouble(value));
         if (value < 10) return "0"+value;
         return (value).toString();
     }
