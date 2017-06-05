@@ -23,7 +23,7 @@ interface RunConverterIF {
         //Get only pace minutes
 
         var min_pace: Double = minScKm;
-        if (index != -1)  min_pace = this.RemoveDecimalValue(min_sc_km);
+        if (index != -1)  min_pace = this.RemoveDecimalValue(minScKm);
 
         //Get only pace seconds
         var sec_pace: Int = 0;
@@ -36,11 +36,13 @@ interface RunConverterIF {
      * @param distance double value to asign total kms to convert. For Example: If value > 5 considerer input meters
      * @return String with vO2max, result example '3850 (metres)-> VO2 max = 74 To calculate: (meters - 504) / 45
      */
-    fun vO2MaxInCooperTest(distance) {
+    fun vO2MaxInCooperTest(distance: Double) {
 
-        if (distance < 1000) /*Distance in kmeters*/ distance = this.GetDistanceinMeters(distance);
+        if (distance < 1000) /*Distance in kmeters*/ {
+            distance = this.GetDistanceinMeters(distance)
+        }
 
-        return this.getDoubleValue(String((distance - 504) / 45), 3);
+        return this.getDoubleValue(((distance - 504) / 45).toString(), 3);
     }
 
     /**
@@ -49,8 +51,8 @@ interface RunConverterIF {
      * @param in_km To return value in kilometers instead of meters (default)
      * @return String with distance in meters or km (boolean specific)
      */
-    fun distanceNeedToObtainSpecificVO2MaxWithCooperTest(v02:number, in_km: boolean): String{
-        if (!in_km) return String((v02*45) + 504);
+    fun distanceNeedToObtainSpecificVO2MaxWithCooperTest(v02:Double, in_km: Boolean): String{
+        if (!in_km) return ((v02*45) + 504).toString();
         return (this.GetDoubleValue((this.getDistanceInKms((v02*45) + 504)).toString(), 3));
     }
 
@@ -65,11 +67,11 @@ interface RunConverterIF {
      * @param max_fc  max ppm
      * @return Obtain select percent zone ppm range
      */
-    ObtainFCZoneWithPercent(percent:number, low_fc, max_fc) {
+    fun obtainFCZoneWithPercent(percent:Double, low_fc: String, max_fc: String): String {
 
-        let zone: string = "Zone " + ((percent - 50) / 10 + 1) + ": ";
-        low_fc = parseInt(low_fc);
-        max_fc = parseInt(max_fc);
+        val zone = "Zone " + ((percent - 50) / 10 + 1) + ": ";
+        var low_fc = parseInt(low_fc);
+        var max_fc = parseInt(max_fc);
         return zone + (((max_fc-low_fc) * (percent)/100) + low_fc) + " - " + (((max_fc-low_fc) * (percent+10) / 100) + low_fc);
     }
 
@@ -78,10 +80,10 @@ interface RunConverterIF {
      * @param max_fc max ppm
      * @return FC zones with PPM range
      */
-    ObtainResumeOfFCZones(low_fc, max_fc) {
-        low_fc = parseInt(low_fc);
-        max_fc = parseInt(max_fc);
-        let fc_data = new Array<String>();
+    fun obtainResumeOfFCZones(low_fc: String, max_fc: String) {
+        val low_fc = parseInt(low_fc);
+        val max_fc = parseInt(max_fc);
+        var fc_data = new Array<String>();
         for (let i = 50; i <= 90; i = i+10)
         {
             fc_data.push(this.ObtainFCZoneWithPercent(i, low_fc, max_fc));
@@ -93,7 +95,7 @@ interface RunConverterIF {
      * @param value to remove decimals (if exist)
      * @return Int value
      */
-    fun RemoveDecimalValue(value: Float): Int
+    fun RemoveDecimalValue(value: Double): Int
     {
         val valueString : String = value.toString();
         var index: Int = valueString.indexOf(".");
