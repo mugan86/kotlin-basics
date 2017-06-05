@@ -38,13 +38,13 @@ interface RunConverterIF {
      * @param distance double value to asign total kms to convert. For Example: If value > 5 considerer input meters
      * @return String with vO2max, result example '3850 (metres)-> VO2 max = 74 To calculate: (meters - 504) / 45
      */
-    fun vO2MaxInCooperTest(distance: Double) {
-
+    fun vO2MaxInCooperTest(_distance: Double) {
+        var distance = _distance
         if (distance < 1000) /*Distance in kmeters*/ {
-            distance = this.GetDistanceinMeters(distance)
+            distance = parseDouble(this.getDistanceinMeters(distance.toString()))
         }
 
-        return this.getDoubleValue(((distance - 504) / 45).toString(), 3);
+        return this.(((distance - 504) / 45).toString(), 3);
     }
 
     /**
@@ -55,7 +55,8 @@ interface RunConverterIF {
      */
     fun distanceNeedToObtainSpecificVO2MaxWithCooperTest(v02:Double, in_km: Boolean): String{
         if (!in_km) return ((v02*45) + 504).toString();
-        return (this.GetDoubleValue((this.getDistanceInKms((v02*45) + 504)).toString(), 3));
+        return (this.GetDoubleValue(parseDouble(this.getDistanceInKms
+                                (((v02*45) + 504).toString())), 3)).toString();
     }
 
     /**
@@ -100,7 +101,7 @@ interface RunConverterIF {
      * @param value to remove decimals (if exist)
      * @return Int value
      */
-    fun RemoveDecimalValue(value: Double): Int
+    fun RemoveDecimalValue(value: Double): Double
     {
         val valueString : String = value.toString();
         var index: Int = valueString.indexOf(".");
@@ -213,11 +214,12 @@ interface RunConverterIF {
      * @return Climb / Descent percentage
      * vertical distance (m) · 100/horizontal distance = climb%
      */
-    fun getClimbPercentage(distance: Float, Climb: Float, distType: Int): Double
+    fun getClimbPercentage(_distance: Double, Climb: Double, distType: Int): Double
     {
+        var distance = _distance
         if (distType != 1) //Not metres
         {
-            if (distType == 2) distance = this.GetDistanceinMeters(distance);
+            if (distType == 2) distance = parseDouble(this.getDistanceinMeters(distance.toString()))
         }
         return this.GetDoubleValue(Climb * 100 / distance, 2);
     }
@@ -229,11 +231,12 @@ interface RunConverterIF {
      * @param distType: Distance unit (m, mile, km,...)
      * @return Climb m+ per km
      */
-    fun getClimbMetersPerKm(distance:Float, Climb: Int, distType: Int): Float
+    fun getClimbMetersPerKm(_distance:Double, Climb: Int, distType: Int): Double
     {
+        var distance = _distance
         if (distType != 2) //Not metres
         {
-            if (distType == 1) distance = this.GetDistanceInKms(distance);
+            if (distType == 1) distance = parseDouble(this.getDistanceInKms(distance.toString()))
         }
         return this.GetDoubleValue(Climb / distance, 2);
     }
@@ -244,9 +247,9 @@ interface RunConverterIF {
      * @param pace_per_km: Time total in seconds to complete one kilometer
      * @return Return result with select digit total. For example result 182.3453 with digit = 2 => 182.34
      */
-    private fun GetDoubleValue(value: Float,digit: Int): Float{
-        var  number:Float;
-        if(value==null) number= 0.0F;
+    private fun GetDoubleValue(value: Double,digit: Int): Double{
+        var  number:Double;
+        if(value==null) number= 0.0;
         else number = value;
         return (Math.round(number * 100) / 100).toFixed(digit);
     }
