@@ -5,5 +5,4 @@ package poo
  */
 
 open class Monument (name: String, high: Int, visitorsPerYear: Int) : Building(name ="Zoo BCN") {
-
 }

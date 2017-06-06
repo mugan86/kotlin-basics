@@ -1,4 +1,3 @@
-import com.sun.xml.internal.fastinfoset.util.StringArray
 import java.lang.Double.parseDouble
 import java.lang.Float.parseFloat
 import java.lang.Integer.parseInt
@@ -35,6 +34,149 @@ interface RunConverterIF {
     }
 
     /**
+     *
+     * @param min_pace int value (minutes)
+     * @param sec_pace int value (seconds)
+     * @return String, result example '04:17 min/km = 14.007782 km/h'
+     */
+    fun paceMinKmToKilometersPerHour(min_pace: Int, sec_pace:Int): String {
+        /*if (sec_pace >= 60) return String.
+                format("Seconds only 0-59 range (Not correct data input: %d minutes - %d seconds", min_pace, sec_pace);*/
+
+        //Obtain total time with decimals (min and seconds)
+        val total_time = (sec_pace / 60) + min_pace;
+
+        val km_h: Double  = (60 / total_time).toDouble()
+
+        return ((Math.round(km_h * 100))/100).toString()
+    }
+
+    /**
+     * @param speed_m_min meters for min
+     * @return String, result example '241.9 m/min = 14.514 km/h'
+     */
+    fun metersMinuteToKilometersPerHour(speed_m_min: Double): Double {
+        if (speed_m_min <= 0) return 0.0
+
+        return this.getDoubleValue(((speed_m_min*60) / 1000), 2)
+    }
+
+    /**
+     * @param speed_km_h Add value in kilometers / hour. For Example: 14.5
+     * @return String, result example '14.514 km/h = 241.9 m/min'
+     */
+    fun kilometersPerHourToMetersMinute(speed_km_h: Double): Double {
+        if (speed_km_h <= 0) return 0.0
+        return this.getDoubleValue((((speed_km_h/60)*1000)), 2)
+    }
+
+    /**
+     * @param speed_m_sec meters for second
+     * @return String, result example '4.0316 m/sec = 14.514 km/h'
+     */
+    fun metersSecondToKilometersPerHour(speed_m_sec: Double) : Double {
+
+        return this.metersMinuteToKilometersPerHour(speed_m_sec * 60)
+    }
+
+    /**
+     * @param speed_km_h Add value in kilometers / hour. For Example: 14.5
+     * @return String, result example '14.514 km/h = 4.0316 m/sec '
+     */
+    fun kilometersPerHourToMetersSecond(speed_km_h: Double) : Double {
+        val result_with_m_min = this.kilometersPerHourToMetersMinute(speed_km_h)
+        //TODO Find to replace in strings kotlin
+        return this.getDoubleValue(((parseDouble(result_with_m_min.replace(",", ".").trim())) / 60), 2)
+    }
+
+    /**
+     * @param time HH:MM:SS formatAdd value in kilometers / hour. For Example: 01:00:00
+     * @param km   double value to asign total kms to convert. For Example: 14.0
+     * @return String with pace min/km, result example '01:00:00 / 15km = 04:00min/km'
+     */
+    fun timeAndKilometersToPacePerKm(time: String, km: Double): String {
+
+        //Get total time to complete km in seconds
+        var time_complete_km_in_seconds = this.getTimeInSecondsFromTime(time)/km;
+        //Apply rint
+        time_complete_km_in_seconds = Math.round(time_complete_km_in_seconds).toDouble()
+
+        //Get min
+        val min_pace: Int = (time_complete_km_in_seconds / 60).toInt()
+
+        //Get seconds to pace per km
+        val sec_pace: Int = (time_complete_km_in_seconds % 60).toInt();
+
+        //Return with pretty format
+        return this.getPaceMinKMInCorrectFormat(min_pace.toString(), sec_pace.toString());
+    }
+
+    /**
+     * @param time        HH:MM:SS formatAdd value in kilometers / hour. For Example: 01:00:00
+     * @param pace_min_km MM:SS String value with pace per km. For Example: 04:00 min/km
+     * @return String with pace min/km, result example '01:00:00 / 04:00min/km = 15km'
+     */
+    fun timeAndPacePerKmToTotalKilometers(time: String, pace_min_km:String): Double {
+
+        //Denbora totala segundutan lortzeko
+        val sgTotalak = this.getTimeInSecondsFromTime(time)
+
+        //Get one km complete in seconds
+        val sgKm: Int =this.getTimeInSecondsFromPacePerKm(pace_min_km)
+
+        //Denbora zehatz batean egin ditugun km kopurua emango da
+        val kilometers: Double = (sgTotalak/sgKm).toDouble()
+
+        return this.getDoubleValue((Math.round(kilometers*1000)/1000).toDouble(), 2)
+    }
+
+    /**
+     * @param km          double value to asign total kms to convert. For Example: 14.0
+     * @param pace_min_km MM:SS String value with pace per km. For Example: 04:00 min/km
+     * @return String with pace min/km, result example '15km / 04:00min/km = 01:00:00'
+     */
+    fun totalKilometersAndPacePerKmToTime(km: Double, pace_min_km: String): String {
+
+        //total seconds to complete one kilometer (from pace per km)
+        val sgKm = this.getTimeInSecondsFromPacePerKm(pace_min_km)
+
+        //Total time to complete x km in x min per km
+        val total_time_in_seconds = sgKm * km
+
+        //Convert total seconds in time format
+        val hours = (total_time_in_seconds / 3600).toString()
+        val minutes = ((total_time_in_seconds % 3600) / 60).toString()
+        val seconds = (total_time_in_seconds % 60).toString()
+        return this.getWithTwoDigits(hours) + ":" +
+                this.getWithTwoDigits(minutes) + ":"+
+                this.getWithTwoDigits(seconds);
+    }
+
+    /**
+     * @param time        HH:MM:SS formatAdd value For Example: 01:00:00
+     * @param total_steps int value. For Example: 12304.
+     * @return String with pace min/km, result example 'x step/min'
+     */
+    fun stepsPerMinuteFromTotalStepsAndTime(time: String, total_steps: Int): Int {
+        /******
+         * 14500 steps in 1h18min00sg (4680seconds)
+         * x steps in minute (60 seconds)
+         *
+         * x = (14500 * 60) / 4680 = 185,89 step / min
+         */
+        return 14500 * 60 /this.getTimeInSecondsFromTime(time)
+    }
+
+    /**
+     * @param km          double value to asign total kms to convert. For Example: 14.0
+     * @param total_steps int value. For Example: 12304.
+     * @return String with pace min/km, result example '15km / 04:00min/km = 01:00:00'
+     */
+    fun stepsPerKmFromTotalStepsAndDistanceKm(km: Double, total_steps: Int): String {
+        return ((total_steps) / km).toString();
+    }
+
+    /**
      * @param distance double value to asign total kms to convert. For Example: If value > 5 considerer input meters
      * @return String with vO2max, result example '3850 (metres)-> VO2 max = 74 To calculate: (meters - 504) / 45
      */
@@ -55,7 +197,7 @@ interface RunConverterIF {
      */
     fun distanceNeedToObtainSpecificVO2MaxWithCooperTest(v02:Double, in_km: Boolean): String{
         if (!in_km) return ((v02*45) + 504).toString();
-        return (this.GetDoubleValue(parseDouble(this.getDistanceInKms
+        return (this.getDoubleValue(parseDouble(this.getDistanceInKms
                                 (((v02*45) + 504).toString())), 3)).toString();
     }
 
@@ -221,7 +363,7 @@ interface RunConverterIF {
         {
             if (distType == 2) distance = parseDouble(this.getDistanceinMeters(distance.toString()))
         }
-        return this.GetDoubleValue(Climb * 100 / distance, 2);
+        return this.getDoubleValue(Climb * 100 / distance, 2);
     }
 
     /**
@@ -238,7 +380,7 @@ interface RunConverterIF {
         {
             if (distType == 1) distance = parseDouble(this.getDistanceInKms(distance.toString()))
         }
-        return this.GetDoubleValue(Climb / distance, 2);
+        return this.getDoubleValue(Climb / distance, 2);
     }
 
     /**
@@ -247,7 +389,7 @@ interface RunConverterIF {
      * @param pace_per_km: Time total in seconds to complete one kilometer
      * @return Return result with select digit total. For example result 182.3453 with digit = 2 => 182.34
      */
-    private fun GetDoubleValue(value: Double,digit: Int): Double{
+    private fun getDoubleValue(value: Double,digit: Int): Double {
         var  number:Double;
         if(value==null) number= 0.0;
         else number = value;
