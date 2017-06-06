@@ -7,6 +7,8 @@ fun main(args: Array<String>) {
     //If use 'val' not mutable = constant
     val name = "Anartz"
 
+    val _name = name.replace("A","");
+
     //Print name value
     printValue("My name is " + name)
 

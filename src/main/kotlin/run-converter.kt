@@ -3,12 +3,8 @@ import java.lang.Float.parseFloat
 import java.lang.Integer.parseInt
 
 /**
- * Created by amugica on 31/05/2017.
+ * Created by Anartz Mugika on 31/05/2017. Updated 06/06/2017.
  */
-
-/**
- *
-        **/
 
 interface RunConverterIF {
     fun getKilometersPerHourToPaceMinKm(speed_km_h: Double): String {
@@ -84,8 +80,7 @@ interface RunConverterIF {
      * @return String, result example '14.514 km/h = 4.0316 m/sec '
      */
     fun kilometersPerHourToMetersSecond(speed_km_h: Double) : Double {
-        val result_with_m_min = this.kilometersPerHourToMetersMinute(speed_km_h)
-        //TODO Find to replace in strings kotlin
+        val result_with_m_min = this.kilometersPerHourToMetersMinute(speed_km_h).toString()
         return this.getDoubleValue(((parseDouble(result_with_m_min.replace(",", ".").trim())) / 60), 2)
     }
 
